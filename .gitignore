@@ -8,3 +8,5 @@
 /detlog.txt
 /Assets/Shaders/VK/*.spv
 /Assets/Shaders/MTL/*.metallib
+.zig-cache
+zig-out
