@@ -4,24 +4,25 @@ pub fn build(b: *std.Build) void {
     const target = b.standardTargetOptions(.{});
     const optimize = b.standardOptimizeOption(.{});
 
-    const lib = b.addStaticLibrary(.{
+    const jolt_lib = b.addStaticLibrary(.{
         .name = "JoltPhysics",
         .target = target,
         .optimize = optimize,
     });
+    const jolt_mod = jolt_lib.root_module;
 
-    lib.addCSourceFiles(.{
+    jolt_mod.addCSourceFiles(.{
         .root = b.path("Jolt"),
         .flags = &.{"-std=c++17"},
         .files = &base_src_files,
     });
-    lib.linkLibCpp();
-    lib.addIncludePath(b.path("./"));
-    lib.installHeadersDirectory(b.path("Jolt"), "Jolt", .{
+    jolt_mod.link_libcpp = true;
+    jolt_mod.addIncludePath(b.path("./"));
+
+    jolt_lib.installHeadersDirectory(b.path("Jolt"), "Jolt", .{
         .include_extensions = &.{ ".h", ".inl" },
     });
-
-    b.installArtifact(lib);
+    b.installArtifact(jolt_lib);
 
     {
         const step = b.step("hello_world", "Runs HelloWorld");
@@ -33,7 +34,7 @@ pub fn build(b: *std.Build) void {
         exe.addCSourceFiles(.{
             .files = &.{"HelloWorld/HelloWorld.cpp"},
         });
-        exe.linkLibrary(lib);
+        exe.linkLibrary(jolt_lib);
         const run = b.addRunArtifact(exe);
         step.dependOn(&run.step);
     }
